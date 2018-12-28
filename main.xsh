@@ -1,3 +1,8 @@
 #!/bin/bash
 
-python main.py
+args=""
+if [ $# -gt 0 ]; then
+    args=$*
+fi    
+
+python main.py ${args}

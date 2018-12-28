@@ -294,6 +294,8 @@ def get_changed_tasks():
     tasks = []
     os.chdir(config.baseline_path)
     cmd = 'git diff master | grep "diff --git"'
+    if os.system(cmd):
+        return tasks
     out = subprocess.check_output(cmd, shell=True)
     out = out.decode()
     out = out.strip()
