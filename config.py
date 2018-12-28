@@ -10,12 +10,12 @@ pjoin = os.path.join
 #   modelce/
 #     tasks
 # DEBUG
-relative_path = os.environ.get('relative_path', '../Paddle')
+relative_path = os.environ.get('relative_path', '..')
 paddle_path = pjoin(workspace, relative_path)
 paddle_path = "/home/paddle/zhengya01/paddle-ce/continuous_evaluation/Paddle"
 #paddle_path = '/chunwei/Paddle'
 
-baseline_repo_url = os.environ.get('repo_url', r'git://github.com/PaddlePaddle/paddle-ce-latest-kpis.git')
+baseline_repo_url = os.environ.get('repo_url', r'git@github.com:/PaddlePaddle/paddle-ce-latest-kpis.git')
 
 baseline_path = pjoin(workspace, 'tasks')
 
