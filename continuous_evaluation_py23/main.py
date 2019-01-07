@@ -136,6 +136,7 @@ def evaluate_tasks(args):
         try:
             log.info("befor run task")
             passed, eval_infos, kpis, kpi_values, kpi_types = evaluate(task)
+            passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos = evaluate(task)
             log.info("after run task", passed)
 
             if mode != "baseline_test":
@@ -151,7 +152,8 @@ def evaluate_tasks(args):
                                               kpis = kpis,
                                               kpi_values = kpi_values,
                                               kpi_types = kpi_types,
-                                              kpi_objs = kpi_objs)
+                                              kpi_objs = kpi_objs,
+                                              detail_infos = detail_infos)
                     log.info("after update record")
                 log.warn('after add evaluation %s result to mongodb' % task)
             if not passed:
@@ -193,6 +195,7 @@ def evaluate(task_name):
 
         # evaluate all the kpis
         eval_infos = []
+        detail_infos = []
         kpis = []
         kpi_values = []
         kpi_types = []
@@ -210,9 +213,10 @@ def evaluate(task_name):
             kpi_types.append(kpi.__class__.__name__)
             # if failed, still continue to evaluate the other kpis to get full statistics.
             eval_infos.append(kpi.fail_info if not suc else kpi.success_info)
+            detail_infos.append(kpi.detail_info)
         log.info("after check kpi")
         log.info("evaluation kpi info: %s %s %s" % (passed, eval_infos, kpis))
-        return passed, eval_infos, kpis, kpi_values, kpi_types
+        return passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos
 
 
 def get_tasks():
