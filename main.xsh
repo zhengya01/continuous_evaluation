@@ -12,6 +12,7 @@ import repo
 import argparse
 import traceback
 import time
+import json
 
 $ceroot=_config.workspace
 os.environ['ceroot'] = _config.workspace
@@ -42,7 +43,6 @@ def main():
     else:
         if (not args.modified) and (not specific_tasks):
             display_fail_info(exception_task)
-        sys.exit(-1)
         exit -1
 
 
@@ -114,6 +114,7 @@ def evaluate_tasks(args):
     all_passed = True
     exception_task = {}
     
+    # get tasks that need to evaluate
     if specific_tasks:
         tasks = specific_tasks
         log.warn('run specific tasks', tasks)
@@ -124,9 +125,12 @@ def evaluate_tasks(args):
         tasks = [v for v in get_tasks()]
         log.warn('run all tasks', tasks)
         
+    #get develop kpis of all tasks and write to develop_kpis
+    prepare_develop_kpis(tasks)
+
     for task in tasks:
         try:
-            passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos = evaluate(task)
+            passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos, develop_infos = evaluate(task)
             if mode != "baseline_test":
                 log.warn('add evaluation %s result to mongodb' % task)
                 kpi_objs = get_kpi_tasks(task)
@@ -140,7 +144,8 @@ def evaluate_tasks(args):
                                               kpi_values = kpi_values,
                                               kpi_types = kpi_types,
                                               kpi_objs = kpi_objs,
-                                              detail_infos = detail_infos)
+                                              detail_infos = detail_infos,
+                                              develop_infos = develop_infos)
             if not passed:
                 all_passed = False
         except Exception as e:
@@ -149,6 +154,41 @@ def evaluate_tasks(args):
 
     return all_passed, exception_task
 
+
+def prepare_develop_kpis(tasks):
+    '''
+    '''
+    # get develop kpis from db
+    develop_kpis = pst.get_kpis_from_db(tasks)
+    # save kpi to file
+    for task in tasks:
+        try:
+            kpis = develop_kpis[task]
+            for kpi in kpis:
+                kpis_keys = json.loads(kpi['kpis-keys'])
+                kpis_values = json.loads(kpi['kpis-values'])
+                assert len(kpis_keys)==len(kpis_values)
+                for i in range(len(kpis_keys)):
+                    save_kpis(task, kpis_keys[1], kpis_values[i])
+        except Exception as e:
+            log.warn(e)
+          
+
+def save_kpis(task_name, kpi_name, kpi_value):
+    '''
+    '''
+    develop_dir = "develop_kpis"
+    task_dir = pjoin(_config.baseline_path, task_name)
+    with PathRecover():
+         os.chdir(task_dir)
+         if os.path.exists(develop_dir):
+             shutil.rmtree(develop_dir)
+         os.makedirs(develop_dir)
+         os.chdir(develop_dir)
+         file_name = kpi_name + "_factor.txt"
+         with open(file_name, 'w') as fout:
+              fout.write("[" + kpi_value + "]")
+              
 
 def evaluate(task_name):
     '''
@@ -171,11 +211,13 @@ def evaluate(task_name):
         except Exception as e:
             print(e)
 
+
         tracking_kpis = get_kpi_tasks(task_name)
 
         # evaluate all the kpis
         eval_infos = []
         detail_infos = []
+        develop_infos = []
         kpis = []
         kpi_values = []
         kpi_types = []
@@ -193,8 +235,10 @@ def evaluate(task_name):
             # if failed, still continue to evaluate the other kpis to get full statistics.
             eval_infos.append(kpi.fail_info if not suc else kpi.success_info)
             detail_infos.append(kpi.detail_info)
+            develop_infos.append(kpi.develop_info)
+            
         log.info("evaluation kpi info: %s %s %s" % (passed, eval_infos, kpis))
-        return passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos
+        return passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos, develop_infos
 
 
 def get_tasks():
