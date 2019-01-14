@@ -7,6 +7,8 @@ import json
 
 db = MongoDB(_config.db_name, host=_config.db_host, port=_config.db_port)
 
+develop_db = MongoDB(_config.develop_db_name, host=_config.develop_db_host, port=_config.develop_db_port)
+
 
 def add_evaluation_record(commitid, date, task, passed, infos, kpis, kpi_values, kpi_types,
                           kpi_objs, detail_infos, develop_infos):
@@ -57,7 +59,7 @@ def get_kpis_from_db(tasks):
     kpis = {}
     for task in tasks:
         cond = {"task": task}
-        res = db.find_sections(_config.table_name, cond, sections, key, limit=1)
+        res = develop_db.find_sections(_config.develop_table_name, cond, sections, key, limit=1)
         for i in res:
             kpis[i["task"]] = {"kpis-keys": i["kpis-keys"], "kpis-values": i["kpis-values"]}
     return kpis
