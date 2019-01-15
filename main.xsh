@@ -132,7 +132,7 @@ def evaluate_tasks(args):
         prepare_develop_kpis(tasks)
 
     for task in tasks:
-            #try:
+        try:
             passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos, develop_infos = evaluate(task)
             if mode != "baseline_test":
                 log.warn('add evaluation %s result to mongodb' % task)
@@ -151,7 +151,7 @@ def evaluate_tasks(args):
                                               develop_infos = develop_infos)
             if not passed:
                 all_passed = False
-            #except Exception as e:
+        except Exception as e:
             exception_task[task] = traceback.format_exc()
             all_passed = False
 
