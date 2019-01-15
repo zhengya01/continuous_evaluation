@@ -13,7 +13,6 @@ pjoin = os.path.join
 relative_path = os.environ.get('relative_path', '..')
 paddle_path = pjoin(workspace, relative_path)
 #paddle_path = '/chunwei/Paddle'
-paddle_path = '/home/paddle/zhengya01/paddle-ce/Paddle'
 
 baseline_repo_url = os.environ.get('repo_url', 'git@github.com:PaddlePaddle/paddle-ce-latest-kpis.git')
 
@@ -40,10 +39,3 @@ develop_db_name = os.environ.get('develop_db_name', 'ce_develop')
 develop_db_host = os.environ.get('develop_db_host', '127.0.0.1')
 develop_db_port = os.environ.get('develop_db_port', 27017)
 develop_table_name = os.environ.get('develop_table_name', 'develop_logs')
-
-db_name = 'ce'
-db_host = '10.255.125.35'
-table_name = 'zy_test'
-develop_db_name = 'ce'
-develop_db_host = '10.255.125.35'
-develop_table_name = 'zy_test_develop'
