@@ -135,8 +135,7 @@ def evaluate_tasks(args):
             if mode != "baseline_test":
                 log.warn('add evaluation %s result to mongodb' % task)
                 kpi_objs = get_kpi_tasks(task)
-                #if (not args.modified) and (not specific_tasks):
-                if not ((not args.modified) and (not specific_tasks)):
+                if (not args.modified) and (not specific_tasks):
                     pst.add_evaluation_record(commitid = paddle_commit,
                                               date = commit_time,
                                               task = task,
