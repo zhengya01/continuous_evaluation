@@ -13,6 +13,7 @@ import argparse
 import traceback
 import time
 import json
+import shutil
 
 $ceroot=_config.workspace
 os.environ['ceroot'] = _config.workspace
@@ -134,7 +135,8 @@ def evaluate_tasks(args):
             if mode != "baseline_test":
                 log.warn('add evaluation %s result to mongodb' % task)
                 kpi_objs = get_kpi_tasks(task)
-                if (not args.modified) and (not specific_tasks):
+                #if (not args.modified) and (not specific_tasks):
+                if not ((not args.modified) and (not specific_tasks)):
                     pst.add_evaluation_record(commitid = paddle_commit,
                                               date = commit_time,
                                               task = task,
@@ -163,13 +165,14 @@ def prepare_develop_kpis(tasks):
     # save kpi to file
     for task in tasks:
         try:
+            if task not in develop_kpis:
+                continue
             kpis = develop_kpis[task]
-            for kpi in kpis:
-                kpis_keys = json.loads(kpi['kpis-keys'])
-                kpis_values = json.loads(kpi['kpis-values'])
-                assert len(kpis_keys)==len(kpis_values)
-                for i in range(len(kpis_keys)):
-                    save_kpis(task, kpis_keys[1], kpis_values[i])
+            kpis_keys = kpis['kpis-keys']
+            kpis_values = json.loads(kpis['kpis-values'])
+            assert len(kpis_keys)==len(kpis_values)
+            for i in range(len(kpis_keys)):
+                save_kpis(task, kpis_keys[i], kpis_values[i])
         except Exception as e:
             log.warn(e)
           
@@ -181,13 +184,13 @@ def save_kpis(task_name, kpi_name, kpi_value):
     task_dir = pjoin(_config.baseline_path, task_name)
     with PathRecover():
          os.chdir(task_dir)
-         if os.path.exists(develop_dir):
-             shutil.rmtree(develop_dir)
-         os.makedirs(develop_dir)
+         if not os.path.exists(develop_dir):
+             os.makedirs(develop_dir)
          os.chdir(develop_dir)
          file_name = kpi_name + "_factor.txt"
          with open(file_name, 'w') as fout:
-              fout.write("[" + kpi_value + "]")
+             for item in kpi_value:
+                 fout.write(str(item) + '\n')
               
 
 def evaluate(task_name):
