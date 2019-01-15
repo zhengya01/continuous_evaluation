@@ -16,7 +16,8 @@ import json
 import shutil
 import subprocess
 
-ceroot=_config.workspace
+ceroot = _config.workspace
+develop_evaluate = _config.develop_evaluate
 os.environ['ceroot'] = _config.workspace
 mode = os.environ.get('mode', 'evaluation')
 specific_tasks = os.environ.get('specific_tasks', None)
@@ -25,7 +26,7 @@ case_type = os.environ.get('case_type', None)
 
 
 def parse_args():
-    parser= argparse.ArgumentParser("Tool for running CE models")
+    parser = argparse.ArgumentParser("Tool for running CE models")
     parser.add_argument(
         '--modified',
         action='store_true',
@@ -134,7 +135,9 @@ def evaluate_tasks(args):
         
     log.info("tasks", tasks)
     #get develop kpis of all tasks and write to develop_kpis
-    prepare_develop_kpis(tasks)
+
+    if develop_evaluate == 'True':
+        prepare_develop_kpis(tasks)
 
     for task in tasks:
         try:
@@ -259,6 +262,8 @@ def evaluate(task_name):
             develop_infos.append(kpi.develop_info)
         log.info("after check kpi")
         log.info("evaluation kpi info: %s %s %s" % (passed, eval_infos, kpis))
+        if develop_evaluate == 'False':
+            develop_infos = []
         return passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos, develop_infos
 
 

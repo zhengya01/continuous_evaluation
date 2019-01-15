@@ -34,6 +34,7 @@ db_host = os.environ.get('db_host', '127.0.0.1')
 db_port = os.environ.get('db_port', 27017)
 table_name = os.environ.get('table_name', 'logs')
 
+develop_evaluate = os.environ.get('develop_evaluate', 'False')
 
 develop_db_name = os.environ.get('develop_db_name', 'ce_develop')
 develop_db_host = os.environ.get('develop_db_host', '127.0.0.1')

@@ -16,6 +16,7 @@ import json
 import shutil
 
 $ceroot=_config.workspace
+develop_evaluate=_config.develop_evaluate
 os.environ['ceroot'] = _config.workspace
 mode = os.environ.get('mode', 'evaluation')
 specific_tasks = os.environ.get('specific_tasks', None)
@@ -127,10 +128,11 @@ def evaluate_tasks(args):
         log.warn('run all tasks', tasks)
         
     #get develop kpis of all tasks and write to develop_kpis
-    prepare_develop_kpis(tasks)
+    if develop_evaluate == 'True':
+        prepare_develop_kpis(tasks)
 
     for task in tasks:
-        try:
+            #try:
             passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos, develop_infos = evaluate(task)
             if mode != "baseline_test":
                 log.warn('add evaluation %s result to mongodb' % task)
@@ -149,7 +151,7 @@ def evaluate_tasks(args):
                                               develop_infos = develop_infos)
             if not passed:
                 all_passed = False
-        except Exception as e:
+            #except Exception as e:
             exception_task[task] = traceback.format_exc()
             all_passed = False
 
@@ -239,6 +241,8 @@ def evaluate(task_name):
             detail_infos.append(kpi.detail_info)
             develop_infos.append(kpi.develop_info)
             
+        if develop_evaluate == 'False':
+            develop_infos = []
         log.info("evaluation kpi info: %s %s %s" % (passed, eval_infos, kpis))
         return passed, eval_infos, kpis, kpi_values, kpi_types, detail_infos, develop_infos
 
